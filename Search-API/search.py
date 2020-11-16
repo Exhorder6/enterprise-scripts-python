@@ -4,8 +4,9 @@ import json
 import os
 import sys
 
+import pandas as pd
+from pandas.io.json import json_normalize
 import requests
-from requests_oauthlib import OAuth1
 from dotenv import load_dotenv
 load_dotenv(verbose=True)  # Throws error if it can't find .env file
 
@@ -41,8 +42,13 @@ def main():
     except requests.exceptions.RequestException as e:
         print(e)
         sys.exit(120)
-    print(f"Status: {first_response.status_code}\n", format_response(first_response), "\n")
+    # print(f"Status: {first_response.status_code}\n", format_response(first_response), "\n")
     json_response = (json.loads(first_response.text))
+
+    print(format_response(first_response))
+    # Convert to dataframe
+    # df = json_normalize(first_response)
+    # print(df)
 
     # Pagination logic (if -n flag is passed, paginate through the results)
     if json_response.get("next") is None or args.next is False:
@@ -100,6 +106,12 @@ def format_response(response):
         formatted_response = response.text
 
     return formatted_response
+
+
+def create_dataframe(response):
+    df = pd.read_json(response, orient='index')
+
+    return df
 
 
 if __name__ == '__main__':
